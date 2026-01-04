@@ -2888,6 +2888,30 @@ pub fn COMPONENT(world: *world_t, comptime T: type) void {
     });
 }
 
+pub fn COMPONENT_WITH_HOOKS(world: *world_t, comptime T: type, hooks: type_hooks_t) void {
+    if (@sizeOf(T) == 0)
+        @compileError("Size of the type must be greater than zero");
+
+    const type_id_ptr = perTypeGlobalVarPtr(T);
+    if (type_id_ptr.* != 0)
+        return;
+
+    component_ids_hm.put(type_id_ptr, 0) catch @panic("OOM");
+
+    type_id_ptr.* = ecs_component_init(world, &.{
+        .entity = ecs_entity_init(world, &.{
+            .use_low_id = true,
+            .name = typeName(T),
+            .symbol = typeName(T),
+        }),
+        .type = .{
+            .alignment = @alignOf(T),
+            .size = @sizeOf(T),
+            .hooks = hooks,
+        },
+    });
+}
+
 pub fn TAG(world: *world_t, comptime T: type) void {
     if (@sizeOf(T) != 0)
         @compileError("Size of the type must be zero");
