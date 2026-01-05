@@ -2913,9 +2913,6 @@ pub fn COMPONENT_WITH_HOOKS(world: *world_t, comptime T: type, hooks: type_hooks
 }
 
 pub fn TAG(world: *world_t, comptime T: type) void {
-    if (@sizeOf(T) != 0)
-        @compileError("Size of the type must be zero");
-
     const type_id_ptr = perTypeGlobalVarPtr(T);
     if (type_id_ptr.* != 0)
         return;
